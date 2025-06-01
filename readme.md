@@ -31,10 +31,18 @@ Start Redis ServerEnsure Redis is running on localhost:6379. On Ubuntu/Windows i
 sudo apt-get install redis-server
 redis-server
 
+On a Windows machine open the folder where redis is located in a powershell or cmd prompt and navigate to the folder
+for Windows PS ./redis-server.exe
+for Windows CMD cd\Redis\redis-server.exe for example where redis folder is in path c:\Redis\
+
 ######
 
 Run Celery WorkerIn a separate terminal, start the Celery worker or run in a detached mode:
 celery -A main.celery worker --loglevel=info
+
+If using Windows I encountered an error where I would need to set the additional permission to run concurrent celery workers
+Instead of doing this you can run it using celery -A main.celery worker --loglevel=debug --pool=solo this should circumvent
+the need to go and set additional thread permissions for celery. It seems to run fine on a Linux VM or Linux Virtualbox environment.
 
 ######
 
@@ -44,10 +52,15 @@ uvicorn main:app --reload
 ######
 
 Access the API
+You can do this by copying the example URL into the browser
 
 Open http://127.0.0.1:8000/docs for the Swagger UI.
 Endpoint: GET /flights/?airline_code=<code>&flight_number=<number>&departure_date=<YYYY-MM-DD>
 Example: http://127.0.0.1:8000/flights/?airline_code=AA&flight_number=1004&departure_date=2025-05-26
+
+You can also use the request data script I created for testing to check that it works, I made this one using Frontier Airlines:
+Call via terminal:
+python request_data.py "F9" 201 "2025-06-01"
 
 Running Tests
 Run tests using pytest:

@@ -1,9 +1,7 @@
+from database import Base
 from sqlalchemy import Column, Integer, String, DateTime
-from database import init_db
 
-_, _, Base = init_db()
-
-# Database model
+# Database models
 class Flight(Base):
     __tablename__ = "flights"
     id = Column(Integer, primary_key=True, index=True)
@@ -18,6 +16,7 @@ class Flight(Base):
     status = Column(String)
     gate = Column(String, nullable=True)
 
+# Create but Not implemented
 class LogApiUse(Base):
     __tablename__ = "api_log"
     id = Column(Integer, primary_key=True, index=True)

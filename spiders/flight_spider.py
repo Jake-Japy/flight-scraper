@@ -1,4 +1,3 @@
-# spiders/flight_spider.py
 import scrapy
 from datetime import datetime
 import uuid
@@ -19,8 +18,8 @@ class FlightSpider(scrapy.Spider):
         ]
 
     def parse(self, response):
+        #Attempt to extract some flight data from the URL and scrape it
         try:
-            # Extract flight details with robust fallbacks
             try:
                 flight_no_elem = response.css("div[class*='FlightNumberContainer']::text").get()
                 flight_no = flight_no_elem.strip() if flight_no_elem else f"{self.airline_code}{self.flight_number}"
@@ -57,12 +56,12 @@ class FlightSpider(scrapy.Spider):
                 logger.warning(f"Failed to extract gate: {e}")
                 gate = None
 
-            # Convert departure_date to datetime
             try:
-                parsed_date = datetime.strptime(self.departure_date, "%Y-%m-%d").date()
+                parsed_date = datetime.strptime(self.departure_date, "%Y-%m-%d")
             except ValueError as e:
                 logger.error(f"Invalid departure date format: {e}")
-                return {"error": f"Invalid departure date format: {self.departure_date}"}
+                yield {"error": f"Invalid departure date format: {self.departure_date}"}
+                return
 
             flight_data = {
                 "flight_id": str(uuid.uuid4()),
@@ -77,13 +76,13 @@ class FlightSpider(scrapy.Spider):
                 "gate": gate
             }
 
-            # Check if flight data is mostly empty
             if all(v in ["N/A", None] for k, v in flight_data.items() if
                    k not in ["flight_id", "airline_code", "flight_number", "departure_date"]):
                 logger.warning(f"No valid flight data found for {self.airline_code}{self.flight_number} on {self.departure_date}")
-                return {"error": f"No flight data available for {self.airline_code}{self.flight_number} on {self.departure_date}"}
+                yield {"error": f"No flight data available for {self.airline_code}{self.flight_number} on {self.departure_date}"}
+                return
 
-            yield flight_data  # Use yield to return data to Scrapy
+            yield flight_data
 
         except Exception as e:
             logger.error(f"Scraping error for {response.url}: {str(e)}")
